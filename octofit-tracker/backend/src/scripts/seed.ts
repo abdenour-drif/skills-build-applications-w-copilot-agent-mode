@@ -1,5 +1,5 @@
 import mongoose, { Types } from 'mongoose';
-import { Activity, LeaderboardEntry, Team, User, Workout } from '../models/index.js';
+import { Activity, LeaderboardEntry as Leaderboard, Team, User, Workout } from '../models/index.js';
 
 const connectionString = process.env.MONGODB_URI || 'mongodb://localhost:27017/octofit_db';
 
@@ -40,30 +40,33 @@ async function seedDatabase() {
 
     const teamsByName = new Map();
     for (const teamSeed of teamSeeds) {
-      const team = await Team.findOneAndUpdate(
-        { name: teamSeed.name },
-        { $set: teamSeed },
-        { upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true },
-      );
+      let team = await Team.findOne({ name: teamSeed.name });
+      if (team) {
+        team.set(teamSeed);
+        await team.save();
+      } else {
+        team = await Team.create(teamSeed);
+      }
       teamsByName.set(team.name, team);
     }
 
     const usersByUsername = new Map();
     for (const userSeed of userSeeds) {
       const team = teamsByName.get(userSeed.teamName);
-      const user = await User.findOneAndUpdate(
-        { username: userSeed.username },
-        {
-          $set: {
+      const userFields = {
             username: userSeed.username,
             email: userSeed.email,
             firstName: userSeed.firstName,
             lastName: userSeed.lastName,
             team: team._id,
-          },
-        },
-        { upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true },
-      );
+      };
+      let user = await User.findOne({ username: userSeed.username });
+      if (user) {
+        user.set(userFields);
+        await user.save();
+      } else {
+        user = await User.create(userFields);
+      }
       usersByUsername.set(user.username, user);
     }
 
@@ -83,11 +86,18 @@ async function seedDatabase() {
     for (const activitySeed of activitySeeds) {
       const user = usersByUsername.get(activitySeed.username);
       const { username, ...activityFields } = activitySeed;
-      await Activity.findOneAndUpdate(
-        { user: user._id, activityType: activityFields.activityType, completedAt: activityFields.completedAt },
-        { $set: { ...activityFields, user: user._id } },
-        { upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true },
-      );
+      const activityFieldsWithUser = { ...activityFields, user: user._id };
+      let activity = await Activity.findOne({
+        user: user._id,
+        activityType: activityFields.activityType,
+        completedAt: activityFields.completedAt,
+      });
+      if (activity) {
+        activity.set(activityFieldsWithUser);
+        await activity.save();
+      } else {
+        await Activity.create(activityFieldsWithUser);
+      }
       pointsByUser.set(username, (pointsByUser.get(username) ?? 0) + activityFields.points);
     }
 
@@ -96,11 +106,19 @@ async function seedDatabase() {
       .sort((left, right) => right.points - left.points);
 
     for (const [index, rankedUser] of rankedUsers.entries()) {
-      await LeaderboardEntry.findOneAndUpdate(
-        { user: rankedUser.user._id, period: 'all-time' },
-        { $set: { user: rankedUser.user._id, points: rankedUser.points, rank: index + 1, period: 'all-time' } },
-        { upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true },
-      );
+      const leaderboardFields = {
+        user: rankedUser.user._id,
+        points: rankedUser.points,
+        rank: index + 1,
+        period: 'all-time',
+      };
+      let leaderboardEntry = await Leaderboard.findOne({ user: rankedUser.user._id, period: 'all-time' });
+      if (leaderboardEntry) {
+        leaderboardEntry.set(leaderboardFields);
+        await leaderboardEntry.save();
+      } else {
+        await Leaderboard.create(leaderboardFields);
+      }
     }
 
     const pointsByTeam = new Map<string, number>(teamSeeds.map(({ name }) => [name, 0]));
@@ -114,11 +132,13 @@ async function seedDatabase() {
     }
 
     for (const workoutSeed of workoutSeeds) {
-      await Workout.findOneAndUpdate(
-        { title: workoutSeed.title },
-        { $set: workoutSeed },
-        { upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true },
-      );
+      let workout = await Workout.findOne({ title: workoutSeed.title });
+      if (workout) {
+        workout.set(workoutSeed);
+        await workout.save();
+      } else {
+        await Workout.create(workoutSeed);
+      }
     }
 
     console.log(`Seeded ${userSeeds.length} users, ${teamSeeds.length} teams, ${activitySeeds.length} activities, ${rankedUsers.length} leaderboard entries, and ${workoutSeeds.length} workouts`);
