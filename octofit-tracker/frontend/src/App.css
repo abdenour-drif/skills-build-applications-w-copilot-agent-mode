@@ -1,0 +1,89 @@
+.app-shell {
+  min-height: 100vh;
+  background: #f4f7fb;
+}
+
+.app-header {
+  background: #123b5d;
+  color: #fff;
+}
+
+.app-header-content {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 2rem;
+  padding-block: 1rem;
+}
+
+.app-brand {
+  color: #fff;
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.app-navigation {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.app-navigation-link {
+  border-radius: 0.375rem;
+  color: #d7e7f4;
+  padding: 0.45rem 0.7rem;
+  text-decoration: none;
+}
+
+.app-navigation-link:hover,
+.app-navigation-link.active {
+  background: #245779;
+  color: #fff;
+}
+
+.collection-page {
+  padding-block: 2.5rem;
+}
+
+.collection-heading {
+  margin-bottom: 1.5rem;
+}
+
+.collection-heading h1 {
+  color: #123b5d;
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 700;
+  letter-spacing: normal;
+  margin: 0 0 0.5rem;
+}
+
+.eyebrow {
+  color: #39759e;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+}
+
+.collection-description {
+  color: #526475;
+}
+
+.collection-table-wrap {
+  border: 1px solid #dce5ec;
+  border-radius: 0.6rem;
+  background: #fff;
+}
+
+.collection-table {
+  margin-bottom: 0;
+}
+
+.collection-table thead th {
+  background: #eaf1f6;
+  color: #234a66;
+  white-space: nowrap;
+}
