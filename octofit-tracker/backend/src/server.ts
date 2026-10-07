@@ -12,6 +12,10 @@ const apiBaseUrl = codespaceName
 
 app.use(express.json());
 
+app.get('/', (_request, response) => {
+  response.redirect('/api');
+});
+
 app.get('/api', (_request, response) => {
   response.json({
     baseUrl: apiBaseUrl,

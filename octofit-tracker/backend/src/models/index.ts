@@ -57,5 +57,5 @@ const workoutSchema = new Schema(
 export const User = model('User', userSchema);
 export const Team = model('Team', teamSchema);
 export const Activity = model('Activity', activitySchema);
-export const LeaderboardEntry = model('LeaderboardEntry', leaderboardSchema);
+export const LeaderboardEntry = model('LeaderboardEntry', leaderboardSchema, 'leaderboard');
 export const Workout = model('Workout', workoutSchema);
